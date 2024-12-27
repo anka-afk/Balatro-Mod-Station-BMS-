@@ -3,9 +3,14 @@
 
 import os
 import shutil
+
+from requests.packages import target
+
+from config import Config
 from downloader import download_file
 from github_api import get_latest_release
-from  utils import  ensure_folder_exists, unzip_file
+from utils import ensure_folder_exists, unzip_file
+
 
 def install_version_dll(game_root):
     repo_name = "ethangreen-dev/lovely-injector"
@@ -54,11 +59,21 @@ def install_version_dll(game_root):
     return "lovely 安装成功！"
 
 def install_loader_mods(mods_folder):
-    loader_url = ""
-    zip_path = os.path.join(mods_folder, "loader.zip")
-    download_file(loader_url, zip_path)
+    from git import  Repo
+    repo_url = Config.steamodded_repo_url
+    target_path = os.path.join(mods_folder, "Steamodded")
 
-    # 解压
-    from utils import unzip_file
-    unzip_file(zip_path, mods_folder)
-    return "加载器安装完成"
+    ensure_folder_exists(mods_folder)
+    if os.path.exists(target_path):
+        try:
+            shutil.rmtree(target_path)
+        except Exception as e:
+            return f"清理旧加载器失败: {e}"
+
+    try:
+        print(f"正在克隆仓库到 {target_path}...")
+        Repo.clone_from(repo_url, target_path)
+    except Exception as e:
+        return f"克隆加载器失败: {e}"
+
+    return "Steamodded 加载器安装完成！"

@@ -3,6 +3,8 @@
 
 import  os
 import zipfile
+import  json
+from config import Config
 
 def ensure_folder_exists(folder):
     if not os.path.exists(folder):
@@ -11,3 +13,13 @@ def ensure_folder_exists(folder):
 def unzip_file(zip_path,dest_path):
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(dest_path)
+
+def load_config():
+    if os.path.exists(Config.config_path):
+        with open(Config.config_path, "r") as file:
+            return json.load(file)
+    return {}
+
+def save_config(config):
+    with open(Config.config_path, "w") as file:
+        json.dump(config, file, indent=4)

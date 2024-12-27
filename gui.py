@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.status_label)
 
         # 是否存在配置
-        if not(os.path.exists(Config.settings_path)):
+        if not(os.path.exists(Config.config_path)):
             self.status_label = QLabel("请选择游戏目录")
 
             self.auto_search_button = QPushButton("自动搜索游戏目录")
@@ -38,13 +38,18 @@ class MainWindow(QMainWindow):
             self.manual_select_button.clicked.connect(self.manual_select_game_directory)
             layout.addWidget(self.manual_select_button)
         else:
-            with open(Config.settings_path, "r") as file:
+            with open(Config.config_path, "r") as file:
                 data = json.load(file)
                 Config.game_directory = data["game_directory"]
 
         # 是否已安装lovely
-        self.install_dll_button = QPushButton("安装 version.all")
+        self.install_dll_button = QPushButton("安装 lovely")
         self.install_dll_button.clicked.connect(self.install_dll)
+        layout.addWidget(self.install_dll_button)
+
+        # 是否已安装Steammodded
+        self.install_dll_button = QPushButton("安装 Steamodded")
+        self.install_dll_button.clicked.connect(self.install_steamodded)
         layout.addWidget(self.install_dll_button)
 
         central_widget.setLayout(layout)
@@ -54,6 +59,11 @@ class MainWindow(QMainWindow):
         # 调用installer
         from installer import  install_version_dll
         result = install_version_dll(Config.game_directory)
+        self.status_label.setText(result)
+
+    def install_steamodded(self):
+        from installer import install_version_dll
+        result = install_version_dll(Config.mods_path)
         self.status_label.setText(result)
 
     def auto_search_game_directory(self):
@@ -94,5 +104,4 @@ def start_gui():
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec())
 
