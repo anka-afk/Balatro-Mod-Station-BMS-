@@ -5,6 +5,15 @@ from github import Github
 
 def get_latest_release(repo_name):
     g = Github()
-    repo = g.get_repo(repo_name)
-    release = repo.get_latest_release()
-    return release.assets[0].browser_download_url # 最新发行版
+    try:
+        repo = g.get_repo(repo_name)
+        release = repo.get_latest_release()
+
+        for asset in release.assets:
+            if "windows" in asset.name.lower() or "msvc" in asset.name.lower():
+                print(f"找到适合的发行版文件: {asset.name}")
+                return asset.browser_download_url
+
+        raise Exception("没有找到适合的文件")
+    except Exception as e:
+        raise Exception(f"获取发行版信息失败: {e}")
