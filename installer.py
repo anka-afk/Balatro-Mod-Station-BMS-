@@ -3,9 +3,6 @@
 
 import os
 import shutil
-
-from requests.packages import target
-
 from config import Config
 from downloader import download_file
 from github_api import get_latest_release
