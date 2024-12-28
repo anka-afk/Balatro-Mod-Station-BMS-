@@ -4,6 +4,8 @@
 import  os
 import zipfile
 import  json
+from operator import truediv
+
 from config import Config
 
 def ensure_folder_exists(folder):
@@ -23,3 +25,13 @@ def load_config():
 def save_config(config):
     with open(Config.config_path, "w") as file:
         json.dump(config, file, indent=4)
+
+def update_config(key, value):
+    config = load_config()
+
+    if key in config:
+        config[key] = value
+        save_config(config)
+        return  True
+    else:
+        return False
