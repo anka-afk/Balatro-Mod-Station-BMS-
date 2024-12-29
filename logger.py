@@ -3,6 +3,7 @@ from enum import auto
 from enum import Enum, auto
 
 from PyQt6.QtCore import QDateTime
+from PyQt6.QtWidgets import QApplication
 
 
 class LogLevel(Enum):
@@ -30,6 +31,8 @@ class Logger:
         # 输出到logger
         if cls._log_widget is not None:
             cls._log_widget.appendPlainText(log_message)
+            cls._log_widget.repaint()
+            QApplication.processEvents()
 
     @classmethod
     def debug(cls, message):

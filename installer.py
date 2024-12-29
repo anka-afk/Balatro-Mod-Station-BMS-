@@ -6,7 +6,7 @@ import shutil
 from config import Config
 from downloader import download_file
 from github_api import get_latest_release
-from utils import ensure_folder_exists, unzip_file
+from utils import *
 from mods_manager import ModManager
 from logger import Logger
 
@@ -23,47 +23,18 @@ def install_version_dll(game_root):
     except Exception as e:
         return f"获取lovely最新发行版失败: {e}"
 
-    # 临时目录下载解压
-    temp_dir = os.path.join(game_root, "temp")
-    ensure_folder_exists(temp_dir)
+    with temp_directory(prefix="lovely_") as temp_dir:
+        unzip_path = download_and_unzip(url, temp_dir)
 
-    # 下载
-    zip_path = os.path.join(temp_dir, "release.zip")
-    result = download_file(url, zip_path)
-    if "失败" in result:
-        return  result
-
-    # 解压缩到临时目录
-    unzip_path = os.path.join(temp_dir, "unzip")
-    ensure_folder_exists(unzip_path)
-    unzip_file(zip_path, unzip_path)
-
-    # 检查是否存在 version.dll 文件
-    dll_path = None
-    for root, dirs, files in os.walk(unzip_path):
-        if "version.dll" in files:
-            dll_path = os.path.join(root, "version.dll")
-            break
-
-    if not dll_path:
-        # 清理临时目录
-        shutil.rmtree(temp_dir)
-        return "安装失败, 解压后的文件中未找到 version.dll"
-
-    # 将 version.dll 移动到游戏根目录
-    try:
+        dll_path = find_file(unzip_path, "version.dll")
+        if not dll_path:
+            return "安装失败, 解压后的文件中未找到 version.dll"
         shutil.move(dll_path, os.path.join(game_root, "version.dll"))
-    except Exception as e:
-        return f"安装失败, 移动 version.dll 到游戏根目录失败: {e}"
 
-    # 清理临时目录
-    shutil.rmtree(temp_dir)
-
-    ModManager.set_mod_info("lovely-injector", {
-        "version": lovely_version
-    })
-
-    return "lovely 安装成功！"
+        ModManager.set_mod_info("lovely_injector", {
+            "version": lovely_version
+        })
+        return "lovely 安装成功! "
 
 def install_loader_mods(mods_folder):
     '''
