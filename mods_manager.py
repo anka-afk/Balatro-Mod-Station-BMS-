@@ -6,6 +6,7 @@ import  shutil
 from  utils import *
 from config import Config
 from github_api import get_latest_release
+from logger import Logger
 
 def list_mods(mods_folder):
     return  [f for f in os.listdir(mods_folder) if os.path.isdir(os.path.join(mods_folder, f))]
@@ -46,7 +47,7 @@ class ModManager:
             else:
                 cls.mods = {}
         except Exception as e:
-            print(f"加载mod信息失败: {e}")
+            Logger.error(f"加载mod信息失败: {e}")
             cls.mods = {}
 
     @classmethod
@@ -59,7 +60,7 @@ class ModManager:
             config['mods'] = cls.mods
             save_config(config)
         except Exception as e:
-            print(f"保存版本信息失败: {e}")
+            Logger.error(f"保存版本信息失败: {e}")
 
     @classmethod
     def get_mod_info(cls, mod_name):
@@ -100,7 +101,7 @@ class ModManager:
                         "latest_version":latest_version,
                     })
             except Exception as e:
-                print(f"检查模组 {mod_name} 更新失败: {e}")
+                Logger.error(f"检查模组 {mod_name} 更新失败: {e}")
 
         return mods_to_update
 

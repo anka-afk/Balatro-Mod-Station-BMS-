@@ -8,8 +8,9 @@ import  sys, os, json
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QFileDialog,
     QBoxLayout, QPushButton, QLabel,
-    QVBoxLayout, QWidget, QMessageBox)
+    QVBoxLayout, QWidget, QMessageBox, QPlainTextEdit)
 from config import Config
+from logger import Logger
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -23,12 +24,9 @@ class MainWindow(QMainWindow):
 
         # 初始化界面
         layout = QVBoxLayout()
-        self.status_label = QLabel("加载中")
-        layout.addWidget(self.status_label)
 
         # 是否存在配置
         if not(os.path.exists(Config.config_path)):
-            self.status_label = QLabel("请选择游戏目录")
 
             self.auto_search_button = QPushButton("自动搜索游戏目录")
             self.auto_search_button.clicked.connect(self.auto_search_game_directory)
@@ -52,21 +50,34 @@ class MainWindow(QMainWindow):
         self.install_dll_button.clicked.connect(self.install_steamodded)
         layout.addWidget(self.install_dll_button)
 
+        # 日志流
+        self.log_widget = QPlainTextEdit(self)
+        self.log_widget.setReadOnly(True)
+        layout.addWidget(self.log_widget)
+
+        # 应用样式
         central_widget.setLayout(layout)
 
-
     def install_dll(self):
-        # 调用installer
+        '''
+        :return:调用installer安装lovely
+        '''
         from installer import  install_version_dll
         result = install_version_dll(Config.game_directory)
-        self.status_label.setText(result)
+        Logger.log(result)
 
     def install_steamodded(self):
-        from installer import install_version_dll
-        result = install_version_dll(Config.mods_path)
-        self.status_label.setText(result)
+        '''
+        :return:调用installer安装steamodded
+        '''
+        from installer import install_loader_mods
+        result = install_loader_mods(Config.mods_path)
+        Logger.log(result)
 
     def auto_search_game_directory(self):
+        '''
+        :return: 自动搜索并设置游戏根目录
+        '''
         # 常见的安装路径
         possible_paths = [
             r"C:\Program Files\steam\steamapps\common\Balatro",
@@ -88,6 +99,9 @@ class MainWindow(QMainWindow):
         QMessageBox.warning(self, "未找到", "未能自动找到游戏目录，请手动选择。")
 
     def manual_select_game_directory(self):
+        '''
+        :return: 手动选择并设置游戏根目录
+        '''
         selected_dir = QFileDialog.getExistingDirectory(self, "选择游戏目录", "")
         if selected_dir:
             if os.path.exists(os.path.join(selected_dir, "Balatro.exe")):
@@ -104,4 +118,5 @@ def start_gui():
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
+    return  app, window
 

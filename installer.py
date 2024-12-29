@@ -7,14 +7,19 @@ from config import Config
 from downloader import download_file
 from github_api import get_latest_release
 from utils import ensure_folder_exists, unzip_file
-
+from mods_manager import ModManager
+from logger import Logger
 
 def install_version_dll(game_root):
+    '''
+    :param game_root: 游戏根目录
+    :return: 安装lovely到游戏根目录
+    '''
     repo_name = "ethangreen-dev/lovely-injector"
 
     # 获取最新下载URL
     try:
-        url = get_latest_release(repo_name)
+        url, lovely_version = get_latest_release(repo_name, return_version=True)
     except Exception as e:
         return f"获取lovely最新发行版失败: {e}"
 
@@ -53,9 +58,18 @@ def install_version_dll(game_root):
 
     # 清理临时目录
     shutil.rmtree(temp_dir)
+
+    ModManager.set_mod_info("lovely-injector", {
+        "version": lovely_version
+    })
+
     return "lovely 安装成功！"
 
 def install_loader_mods(mods_folder):
+    '''
+    :param mods_folder: Mods文件夹
+    :return: 安装steamodded到Mods文件夹
+    '''
     from git import  Repo
     repo_url = Config.steamodded_repo_url
     target_path = os.path.join(mods_folder, "Steamodded")
@@ -68,7 +82,7 @@ def install_loader_mods(mods_folder):
             return f"清理旧加载器失败: {e}"
 
     try:
-        print(f"正在克隆仓库到 {target_path}...")
+        Logger.info(f"正在克隆仓库到 {target_path}...")
         Repo.clone_from(repo_url, target_path)
     except Exception as e:
         return f"克隆加载器失败: {e}"
