@@ -3,6 +3,8 @@
 
 import os
 import shutil
+from urllib.parse import urlparse
+
 from config import Config
 from downloader import download_file
 from github_api import get_latest_release
